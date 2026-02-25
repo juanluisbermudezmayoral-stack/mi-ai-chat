@@ -32,36 +32,8 @@
 
             addMessage('Tú', userMessage, 'user');
 
-            try {
-                const response = await fetch(`${ENDPOINT}openai/deployments/gpt-5.2-chat/api-version=2024-12-01-preview`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'api-key': API_KEY
-                    },
-                    body: JSON.stringify({
-                        messages: [{ role: 'user', content: userMessage }],
-                        max_tokens: 200
-                    })
-                });
-
-                const data = await response.json();
-                const aiResponse = data.choices[0].message.content;
-                addMessage('🤖 IA', aiResponse, 'ai');
-            } catch (error) {
-                addMessage('Error', 'Revisa tu API Key', 'ai');
-            }
-        }
-
-        function addMessage(sender, text, type) {
-            const chat = document.getElementById('chat');
-            chat.innerHTML += `<div class="message ${type}"><strong>${sender}:</strong> ${text}</div>`;
-            chat.scrollTop = chat.scrollHeight;
-        }
-
-        document.getElementById('messageInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') sendMessage();
-        });
+            
+       
     </script>
 </body>
 </html>
