@@ -27,8 +27,12 @@
 
         async function sendMessage() {
             const input = document.getElementById('messageInput');
-            const userMessage = input.value;
+            const userMessage = input.value.trim();  // ← ESTA LÍNEA ES CRÍTICA
+            if (!userMessage) return;
+            
             input.value = '';
+            addMessage('Tú', userMessage, 'user');
+
 
             addMessage('Tú', userMessage, 'user');
 
