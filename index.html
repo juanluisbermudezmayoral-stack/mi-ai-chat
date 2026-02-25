@@ -23,8 +23,8 @@
     <script>
         const API_KEY = "BHCH5YR29ACVfPWqQiTeju2eTc9wC0LTQr3cokv3ahVvwJfSJp3UJQQJ99CBACHYHv6XJ3w3AAAAACOGUzxo";
         const ENDPOINT = "https://juanl-mm2d5qtt-eastus2.cognitiveservices.azure.com/";
-        const DEPLOYMENT = "gpt-5.2-chat";  // ← TU MODELO CORRECTO
-        const API_VERSION = "2024-12-01-preview";  // ← TU VERSION CORRECTA
+        const DEPLOYMENT = "gpt-5.2-chat";  // Tu modelo
+        const API_VERSION = "2024-12-01-preview";
 
         async function sendMessage() {
             const input = document.getElementById('messageInput');
@@ -35,32 +35,43 @@
             addMessage('Tú', userMessage, 'user');
 
             try {
-                // URL EXACTA con tu modelo y version
-                const url = `${ENDPOINT}openai/deployments/${DEPLOYMENT}/chat/completions?api-version=${API_VERSION}`;
+                // URL + HEADERS CORRECTOS para Azure OpenAI
+                const url = `${ENDPOINT}/openai/deployments/${DEPLOYMENT}/chat/completions?api-version=${API_VERSION}`;
+                
+                console.log('URL:', url);  // DEBUG
                 
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'api-key': API_KEY
+                        'api-key': API_KEY,
+                        'Accept': 'application/json'  // ← HEADER CRÍTICO
                     },
                     body: JSON.stringify({
-                        messages: [{ role: 'user', content: userMessage }],  // ← userMessage correcto
-                        max_tokens: 200
+                        messages: [{
+                            role: "user",
+                            content: userMessage
+                        }],
+                        max_tokens: 500,
+                        temperature: 0.7  // ← FALTABA
                     })
                 });
 
+                console.log('Status:', response.status);  // DEBUG
+                
                 if (!response.ok) {
                     const errorText = await response.text();
-                    console.error('Response completa:', errorText);  // Para debug
-                    throw new Error(`HTTP ${response.status}`);
+                    console.error('ERROR 400 completo:', errorText);
+                    addMessage('❌', `Error ${response.status}: ${errorText.substring(0, 100)}`, 'ai');
+                    return;
                 }
 
                 const data = await response.json();
+                console.log('Respuesta OK:', data);  // DEBUG
                 addMessage('🤖 IA', data.choices[0].message.content, 'ai');
             } catch (error) {
-                console.error('Error completo:', error);
-                addMessage('❌', `Error HTTP ${error.message}`, 'ai');
+                console.error('Fetch error:', error);
+                addMessage('❌', 'Error de conexión', 'ai');
             }
         }
 
