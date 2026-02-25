@@ -33,7 +33,7 @@
             addMessage('Tú', userMessage, 'user');
 
             try {
-                const response = await fetch(`${ENDPOINT}openai/deployments/gpt-5.2-chat/completions?api-version=2024-12-01-preview`, {
+                const response = await fetch(`${ENDPOINT}openai/deployments/gpt-5.2-chat/api-version=2024-12-01-preview`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
