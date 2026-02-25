@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mi Asistente IA ✨</title>
+    <style>
+        body { font-family: Arial; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .chat-container { border: 1px solid #ddd; height: 400px; overflow-y: scroll; padding: 20px; margin: 20px 0; }
+        input { width: 70%; padding: 12px; }
+        button { width: 25%; padding: 12px; background: #0078d4; color: white; border: none; }
+        .message { margin: 10px 0; padding: 10px; border-radius: 10px; }
+        .user { background: #e3f2fd; }
+        .ai { background: #f3f3f3; }
+        img { max-width: 300px; border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <h1>🤖 Mi Asistente IA Personal</h1>
+    
+    <div id="chat" class="chat-container"></div>
+    
+    <input id="messageInput" type="text" placeholder="Pregunta algo (ej: ¿qué es Azure?)">
+    <button onclick="sendMessage()">Enviar 🚀</button>
+
+    <script>
+        const API_KEY = "G39xgaXifdbd0NGVgwARqIeTyx1gBMovexrnwbklzGvoZylNIiXVJQQJ99CBACR0EKYXJ3w3AAABACOG20eE";  // ← Pegar tu clave F0
+        const ENDPOINT = "https://juanluai1.openai.azure.com/";
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const userMessage = input.value;
+            input.value = '';
+
+            addMessage('Tú', userMessage, 'user');
+
+            try {
+                const response = await fetch(`${ENDPOINT}openai/deployments/gpt-5.2-chat/chat/completions?api-version=2024-12-01-preview`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'api-key': API_KEY
+                    },
+                    body: JSON.stringify({
+                        messages: [{ role: 'user', content: userMessage }],
+                        max_tokens: 200
+                    })
+                });
+
+                const data = await response.json();
+                const aiResponse = data.choices[0].message.content;
+                addMessage('🤖 IA', aiResponse, 'ai');
+            } catch (error) {
+                addMessage('Error', 'Revisa tu API Key', 'ai');
+            }
+        }
+
+        function addMessage(sender, text, type) {
+            const chat = document.getElementById('chat');
+            chat.innerHTML += `<div class="message ${type}"><strong>${sender}:</strong> ${text}</div>`;
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+</body>
+</html>
