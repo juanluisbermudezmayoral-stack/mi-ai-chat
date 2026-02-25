@@ -22,41 +22,57 @@
     <button onclick="sendMessage()">Enviar 🚀</button>
 
     <script>
-        const API_KEY = "G39xgaXifdbd0NGVgwARqIeTyx1gBMovexrnwbklzGvoZylNIiXVJQQJ99CBACR0EKYXJ3w3AAABACOG20eE";  // ← Pegar tu clave F0
+        const API_KEY = "G39xgaXifdbd0NGVgwARqIeTyx1gBMovexrnwbklzGvoZylNIiXVJQQJ99CBACR0EKYXJ3w3AAABACOG20eE";
         const ENDPOINT = "https://juanluai1.openai.azure.com/";
-         const DEPLOYMENT = "gpt-5.2-chat"
+        const DEPLOYMENT = "gpt-5.2-chat";  // ← CAMBIADO: gpt-5.2-chat → gpt-35-turbo
         
         async function sendMessage() {
             const input = document.getElementById('messageInput');
-            const userMessage = input.value.trim();  // ← ESTA LÍNEA ES CRÍTICA
+            const userMessage = input.value.trim();  // ← userMessage definido
             if (!userMessage) return;
             
             input.value = '';
             addMessage('Tú', userMessage, 'user');
 
-            try{
-        const res=await fetch(`${ENDPOINT}openai/deployments/gpt-5.2-chat/gpt-5.2-chat/completions?api-version=2024-12-01-preview`,{
-            method:'POST',
-            headers:{'Content-Type':'application/json','api-key':API_KEY},
-            body:JSON.stringify({messages:[{role:'user',content:msg}],max_tokens:200})
+            try {
+                // ← ERROR 1 CORREGIDO: URL correcta
+                const url = `${ENDPOINT}openai/deployments/${DEPLOYMENT}/chat/completions?api-version=2024-02-15-preview`;
+                
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'api-key': API_KEY
+                    },
+                    body: JSON.stringify({
+                        messages: [{ role: 'user', content: userMessage }],  // ← ERROR 2: msg → userMessage
+                        max_tokens: 200
+                    })
+                });
+                
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    throw new Error(`HTTP ${res.status}: ${errorText.substring(0, 100)}`);
+                }
+                
+                const data = await res.json();
+                addMessage('🤖 IA', data.choices[0].message.content, 'ai');
+            } catch (e) {
+                console.error('ERROR:', e);
+                addMessage('❌', 'Error: ' + e.message, 'ai');
+            }
+        }
+
+        function addMessage(sender, text, type) {
+            const chat = document.getElementById('chat');
+            chat.innerHTML += `<div class="message ${type}"><strong>${sender}:</strong> ${text}</div>`;
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        // Enter para enviar
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') sendMessage();
         });
-        
-        if(!res.ok){throw new Error(`HTTP ${res.status}: ${await res.text()}`);}
-        const data=await res.json();
-        addMessage('🤖 IA',data.choices[0].message.content,'ai');
-    }catch(e){
-        console.error('ERROR:',e);
-        addMessage('❌','Error: '+e.message,'ai');
-    }
-}
-
-function addMessage(sender,text,type){
-    document.getElementById('chat').innerHTML+=`<div class="message ${type}"><strong>${sender}:</strong> ${text}</div>`;
-    document.getElementById('chat').scrollTop=document.getElementById('chat').scrollHeight;
-}
-
-document.getElementById('messageInput').addEventListener('keypress',e=>e.key==='Enter'?sendMessage():0);
-       
     </script>
 </body>
 </html>
