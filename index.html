@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Mi Asistente IA ✨</title>
+    <title>Mi Asistente IA</title>
     <style>
         body { font-family: Arial; max-width: 800px; margin: 50px auto; padding: 20px; }
         .chat-container { border: 1px solid #ddd; height: 400px; overflow-y: scroll; padding: 20px; margin: 20px 0; }
@@ -10,56 +10,57 @@
         .message { margin: 10px 0; padding: 10px; border-radius: 10px; }
         .user { background: #e3f2fd; }
         .ai { background: #f3f3f3; }
-        img { max-width: 300px; border-radius: 10px; }
     </style>
 </head>
 <body>
-    <h1>🤖 Mi Asistente IA Personal</h1>
+    <h1>Mi Asistente IA</h1>
     
     <div id="chat" class="chat-container"></div>
     
-    <input id="messageInput" type="text" placeholder="Pregunta algo (ej: ¿qué es Azure?)">
-    <button onclick="sendMessage()">Enviar 🚀</button>
+    <input id="messageInput" type="text" placeholder="Pregunta algo">
+    <button onclick="sendMessage()">Enviar</button>
 
     <script>
         const API_KEY = "G39xgaXifdbd0NGVgwARqIeTyx1gBMovexrnwbklzGvoZylNIiXVJQQJ99CBACR0EKYXJ3w3AAABACOG20eE";
         const ENDPOINT = "https://juanluai1.openai.azure.com/";
-        const DEPLOYMENT = "gpt-5.2-chat";  // ← CAMBIADO: gpt-5.2-chat → gpt-35-turbo
-        
+        const DEPLOYMENT = "gpt-5.2-chat";  // ← TU MODELO CORRECTO
+        const API_VERSION = "2024-12-01-preview";  // ← TU VERSION CORRECTA
+
         async function sendMessage() {
             const input = document.getElementById('messageInput');
-            const userMessage = input.value.trim();  // ← userMessage definido
+            const userMessage = input.value.trim();
             if (!userMessage) return;
             
             input.value = '';
             addMessage('Tú', userMessage, 'user');
 
             try {
-                // ← ERROR 1 CORREGIDO: URL correcta
-                const url = `${ENDPOINT}openai/deployments/${DEPLOYMENT}/chat/completions?api-version=2024-02-15-preview`;
+                // URL EXACTA con tu modelo y version
+                const url = `${ENDPOINT}openai/deployments/${DEPLOYMENT}/chat/completions?api-version=${API_VERSION}`;
                 
-                const res = await fetch(url, {
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'api-key': API_KEY
                     },
                     body: JSON.stringify({
-                        messages: [{ role: 'user', content: userMessage }],  // ← ERROR 2: msg → userMessage
+                        messages: [{ role: 'user', content: userMessage }],  // ← userMessage correcto
                         max_tokens: 200
                     })
                 });
-                
-                if (!res.ok) {
-                    const errorText = await res.text();
-                    throw new Error(`HTTP ${res.status}: ${errorText.substring(0, 100)}`);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Response completa:', errorText);  // Para debug
+                    throw new Error(`HTTP ${response.status}`);
                 }
-                
-                const data = await res.json();
+
+                const data = await response.json();
                 addMessage('🤖 IA', data.choices[0].message.content, 'ai');
-            } catch (e) {
-                console.error('ERROR:', e);
-                addMessage('❌', 'Error: ' + e.message, 'ai');
+            } catch (error) {
+                console.error('Error completo:', error);
+                addMessage('❌', `Error HTTP ${error.message}`, 'ai');
             }
         }
 
@@ -69,7 +70,6 @@
             chat.scrollTop = chat.scrollHeight;
         }
 
-        // Enter para enviar
         document.getElementById('messageInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') sendMessage();
         });
