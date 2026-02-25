@@ -32,7 +32,28 @@
 
             addMessage('Tú', userMessage, 'user');
 
-            
+            try{
+        const res=await fetch(`${ENDPOINT}openai/deployments/gpt-5.2-chat/gpt-5.2-chat/completions?api-version=2024-12-01-preview`,{
+            method:'POST',
+            headers:{'Content-Type':'application/json','api-key':API_KEY},
+            body:JSON.stringify({messages:[{role:'user',content:msg}],max_tokens:200})
+        });
+        
+        if(!res.ok){throw new Error(`HTTP ${res.status}: ${await res.text()}`);}
+        const data=await res.json();
+        addMessage('🤖 IA',data.choices[0].message.content,'ai');
+    }catch(e){
+        console.error('ERROR:',e);
+        addMessage('❌','Error: '+e.message,'ai');
+    }
+}
+
+function addMessage(sender,text,type){
+    document.getElementById('chat').innerHTML+=`<div class="message ${type}"><strong>${sender}:</strong> ${text}</div>`;
+    document.getElementById('chat').scrollTop=document.getElementById('chat').scrollHeight;
+}
+
+document.getElementById('messageInput').addEventListener('keypress',e=>e.key==='Enter'?sendMessage():0);
        
     </script>
 </body>
