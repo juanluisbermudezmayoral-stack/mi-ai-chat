@@ -33,9 +33,6 @@
             input.value = '';
             addMessage('Tú', userMessage, 'user');
 
-
-            addMessage('Tú', userMessage, 'user');
-
             try{
         const res=await fetch(`${ENDPOINT}openai/deployments/gpt-5.2-chat/gpt-5.2-chat/completions?api-version=2024-12-01-preview`,{
             method:'POST',
